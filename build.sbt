@@ -21,4 +21,13 @@ lazy val root = (project in file("."))
     libraryDependencies += "dev.zio" %% "zio" % "1.0.5"
   )
 
+Compile / console / scalacOptions --= Seq("-Wunused")
+
+console / initialCommands := """
+  |println("ZIO main import")
+  |import zio._
+  |import zio.Runtime.{default => rt}
+  |import zio.console._
+  """.stripMargin
+
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
