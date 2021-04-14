@@ -1,10 +1,11 @@
 import Dependencies._
 
+val zioVersion = "1.0.6"
+
 inThisBuild(
   List(
     scalaVersion := "2.13.5",
-    scalacOptions += "-Wunused",
-    scalacOptions += "-deprecation",
+    scalacOptions ++= Seq("-Wunused", "-deprecation"),
     version := "0.1.0-SNAPSHOT",
     organization := "com.example",
     organizationName := "example",
@@ -17,10 +18,16 @@ inThisBuild(
 lazy val root = (project in file("."))
   .settings(
     name := "learn-zio",
-    libraryDependencies += scalaTest  % Test,
-    libraryDependencies += "dev.zio" %% "zio" % "1.0.5"
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio"          % zioVersion,
+      "dev.zio" %% "zio-test"     % zioVersion % "test",
+      "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
+    )
   )
 
+testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
+
+// warn-silent launch console
 Compile / console / scalacOptions --= Seq("-Wunused")
 
 console / initialCommands := """
