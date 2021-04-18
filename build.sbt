@@ -17,7 +17,6 @@ lazy val root = (project in file("."))
   .settings(
     name := "learn-zio",
     libraryDependencies ++= Seq(
-      //"org.scalatest" %% "scalatest"    % "3.2.2",
       "dev.zio" %% "zio"          % zioVersion,
       "dev.zio" %% "zio-test"     % zioVersion % "test",
       "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
