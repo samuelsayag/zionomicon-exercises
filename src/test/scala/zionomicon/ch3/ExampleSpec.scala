@@ -5,8 +5,9 @@ import zio.test._
 import zio.test.Assertion._
 
 object ExampleSpec extends DefaultRunnableSpec {
+  def spec = suite("All suite")(firstSuite, secondSuite)
 
-  def spec = suite("ExampleSpec")(
+  def firstSuite = suite("First suite")(
     test("addition works") {
       assert(1 + 1)(equalTo(2))
     },
@@ -26,6 +27,32 @@ object ExampleSpec extends DefaultRunnableSpec {
         x <- ZIO.succeed(1)
         y <- ZIO.succeed(2)
       } yield assert(x)(equalTo(1)) && assert(y)(equalTo(2))
+    },
+    test("test has same element") {
+      assert(List(1, 2, 3))(hasSameElements(List(2, 3, 1)))
+    },
+    testM("failure I") {
+      for {
+        exit <- ZIO.effect(1 / 0).catchAll(_ => ZIO.fail(())).run
+      } yield assert(exit)(fails(isUnit))
+    },
+    testM("failure II") {
+      for {
+        exit <- ZIO.effect(1 / 0).run
+      } yield assert(exit)(fails(anything))
+    },
+    testM("failure III") {
+      for {
+        exit <- ZIO.effect(1 / 0).run
+      } yield assert(exit)(fails(isSubtype[ArithmeticException](anything)))
+    }
+  )
+
+  def secondSuite = suite("Second suite")(
+    testM("throw ArithmeticException") {
+      for {
+        exit <- ZIO.effect(1 / 0)
+      } yield assert(exit)(throwsA[ArithmeticException])
     }
   )
 
