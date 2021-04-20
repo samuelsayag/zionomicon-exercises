@@ -6,7 +6,7 @@ import zio.test.Assertion._
 
 object ExampleSpec extends DefaultRunnableSpec {
   def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
-    suite("All suite")(firstSuite, secondSuite)
+    suite("All suite")(firstSuite)
 
   def firstSuite: Spec[Any, TestFailure[Nothing], TestSuccess] = suite("First suite")(
     test("addition works") {
@@ -48,13 +48,4 @@ object ExampleSpec extends DefaultRunnableSpec {
       } yield assert(exit)(fails(isSubtype[ArithmeticException](anything)))
     }
   )
-
-  def secondSuite: Spec[Any, TestFailure[Throwable], TestSuccess] = suite("Second suite")(
-    testM("throw ArithmeticException") {
-      for {
-        exit <- ZIO.effect(1 / 0)
-      } yield assert(exit)(throwsA[ArithmeticException])
-    }
-  )
-
 }
