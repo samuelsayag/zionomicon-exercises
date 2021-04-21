@@ -33,7 +33,7 @@ object TestPropCheckSpec extends DefaultRunnableSpec {
     age  <- genInt
   } yield User(name, age)
 
-  val testUser = testM("Test the creation of (correct users)") {
+  val testUser: ZSpec[TestConfig with Random with Sized,Nothing] = testM("Test the creation of (correct users)") {
     check(genUser) { u =>
       assert(u.name)(matchesRegex("""^\p{ASCII}+$""")) && assert(u.age)(
         isLessThan(121) && isGreaterThan(-1)

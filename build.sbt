@@ -1,15 +1,16 @@
 val zioVersion = "1.0.6"
+val minorScala = "2.13"
 
 inThisBuild(
   List(
-    scalaVersion := "2.13.5",
+    scalaVersion := s"$minorScala.5",
     scalacOptions ++= Seq("-Wunused", "-deprecation"),
     version := "0.1.0-SNAPSHOT",
     organization := "com.example",
     organizationName := "example",
     semanticdbEnabled := true,                        // scalafix: enable SemanticDB
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-    scalafixScalaBinaryVersion := "2.13"
+    scalafixScalaBinaryVersion := minorScala
   )
 )
 
