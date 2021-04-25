@@ -1,5 +1,6 @@
-val zioVersion = "1.0.6"
-val minorScala = "2.13"
+val zioVersion        = "1.0.7"
+val zioPreludeVersion = "1.0.0-RC3"
+val minorScala        = "2.13"
 
 inThisBuild(
   List(
@@ -21,7 +22,8 @@ lazy val root = (project in file("."))
       "dev.zio" %% "zio"          % zioVersion,
       "dev.zio" %% "zio-test"     % zioVersion % "test",
       "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
-    )
+    ),
+    libraryDependencies += "dev.zio" %% "zio-prelude" % zioPreludeVersion
   )
 
 testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
@@ -30,10 +32,10 @@ testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 Compile / console / scalacOptions --= Seq("-Wunused")
 
 console / initialCommands := """
-  |println("ZIO main import")
-  |import zio._
-  |import zio.Runtime.{default => rt}
-  |import zio.console._
+                               |println("ZIO main import")
+                               |import zio._
+                               |import zio.Runtime.{default => rt}
+                               |import zio.console._
   """.stripMargin
 
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.

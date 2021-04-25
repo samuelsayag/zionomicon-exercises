@@ -1,0 +1,22 @@
+package zionomicon.ch7
+
+import zio._
+import zio.console._
+import zio.duration._
+import zio.{ App => ZIOApp }
+import zio.clock.Clock
+
+object ParallAndConc
+
+object ZipParEx extends ZIOApp {
+
+  def run(args: List[String]): URIO[ZEnv, ExitCode] =
+    demoZipPar.exitCode
+
+  def demoZipPar: ZIO[Clock, Throwable, (URIO[Console, Unit], Nothing)] = {
+    val e1 = ZIO.sleep(5.seconds) *> putStrLn("First effect")
+    val e2 = ZIO.sleep(5.seconds) *> ZIO.effect(throw new Exception("Boom!"))
+
+    e1.zipPar(e2)
+  }
+}
