@@ -10,6 +10,7 @@ Concept:
 * act on environment channel
 * resource management
 
+<p>
 <style type="text/css">
 .tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
 .tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
@@ -143,3 +144,4 @@ Concept:
   </tr>
 </tbody>
 </table>
+</p>

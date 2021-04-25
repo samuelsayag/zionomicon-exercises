@@ -7,8 +7,6 @@ inThisBuild(
     scalaVersion := s"$minorScala.5",
     scalacOptions ++= Seq("-Wunused", "-deprecation"),
     version := "0.1.0-SNAPSHOT",
-    organization := "com.example",
-    organizationName := "example",
     semanticdbEnabled := true,                        // scalafix: enable SemanticDB
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
     scalafixScalaBinaryVersion := minorScala
