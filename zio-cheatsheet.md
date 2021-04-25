@@ -1,17 +1,4 @@
-The language of ZIO
-===================
-
-Concept:
-* act on the execution of the effect
-* compose effect sequentially
-* compose effect in parallel
-* act on the success channel
-* act on the error channel
-* act on environment channel
-* resource management
-
-<p>
-<style type="text/css">
+<style type='text/css'>
 .tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
 .tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
   font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
@@ -24,6 +11,20 @@ Concept:
 .tg .tg-r5us{font-family:"Courier New", Courier, monospace !important;;text-align:center;vertical-align:top}
 .tg .tg-0lax{text-align:left;vertical-align:top}
 </style>
+
+The language of ZIO
+===================
+
+Concept:
+* act on the execution of the effect
+* compose effect sequentially
+* compose effect in parallel
+* act on the success channel
+* act on the error channel
+* act on environment channel
+* resource management
+
+
 <table class="tg">
 <thead>
   <tr>
@@ -144,4 +145,3 @@ Concept:
   </tr>
 </tbody>
 </table>
-</p>
