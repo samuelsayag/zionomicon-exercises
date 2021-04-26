@@ -1,0 +1,22 @@
+package zionomicon.ch8
+
+import zio._
+import zio.console._
+import zio.clock._
+import zio.{ App => ZIOApp }
+
+object FiberSupervision {}
+
+object FiberSuper1 extends ZIOApp {
+
+  def run(args: List[String]): URIO[ZEnv, ExitCode] =
+    neverEnding *> putStrLn("End of prog...").exitCode
+
+  def neverEnding = for {
+    _     <- putStrLn("enter the effect")
+    fiber <- putStrLn("enter the never") *> ZIO.never.fork // ending immediatly if not "joined"
+    // _ <- putStrLn("enter the never") *> ZIO.never // never ending
+    _ <- fiber.join
+  } yield ()
+
+}
