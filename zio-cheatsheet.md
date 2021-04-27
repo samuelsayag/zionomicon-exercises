@@ -15,9 +15,12 @@ The essence of the API is to have a _few number of types_ (as few as possible an
 
 ## Convention in this sheet
 
-You will notice that this cheatsheet does not give you information about type for a given combinator.
+You will notice that this cheatsheet gives almost no information about type for a given combinator.
+
 Indeed it leverage the fact that ZIO is written above a very small well designed number of types (other like function are not specific to ZIO of course) that compose incredibly well.
+
 Consequently, the below notation is enumerating these essential types together with a short way of denoting them.
+
 It reads more easily and allows to throw away some complexity of the signature that practice of the library will anyway eliminate.
 
 + Effect of type ZIO are call `e`, `e1`, `e2`... 
