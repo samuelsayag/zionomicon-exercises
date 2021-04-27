@@ -21,7 +21,8 @@ lazy val root = (project in file("."))
       "dev.zio" %% "zio-test"     % zioVersion % "test",
       "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
     ),
-    libraryDependencies += "dev.zio" %% "zio-prelude" % zioPreludeVersion
+    libraryDependencies += "dev.zio" %% "zio-prelude" % zioPreludeVersion,
+    fork := true
   )
 
 testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
