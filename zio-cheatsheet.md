@@ -14,15 +14,21 @@ The essence of the API is to have a _few number of types_ (as few as possible an
 + The combinators try to give relations between types of the ZIO library when possible.
 
 ## Convention in this sheet
+
+You will notice that this cheatsheet does not give you information about type for a given combinator.
+Indeed it leverage the fact that ZIO is written above a very small well designed number of types (other like function are not specific to ZIO of course) that compose incredibly well.
+Consequently, the below notation is enumerating these essential types together with a short way of denoting them.
+It reads more easily and allows to throw away some complexity of the signature that practice of the library will anyway eliminate.
+
 + Effect of type ZIO are call `e`, `e1`, `e2`... 
 + Collection, noted `c` are taken in a broad sense when functions apply to them. They can be: `Option`, `Set`, `Chunk`, `Array`, `Collection <: Iterable`. This document just use the type `Collection` that do not exist per se but allows to write `Collection[A]` and intends all the concrete types cited above. 
 + Collection of effect (in the same sense than above) of effect are noted `ce`
-+ function is noted `f`, `fm` (funtion the return effect)
-+ duration is noted `d`
-+ schedule is noted `s`
++ function is noted `f` (A => B), `fm` (funtion the return effect: A => ZIO[...])
++ zio.duration is noted `d`
++ ZSchedule is noted `s`
 + ZScope is noted `zs`
 + ZManaged is noted `zm`
-+ ExecutionContext `ec`
++ ExecutionContext (scala) `ec`, Executor `ex`
 
 # The `ZIO` type
 
@@ -30,8 +36,9 @@ The `ZIO[-R,+E,+A]` type is central to the whole API and is extremelly rich in c
 
 They have different purpose and can be roughly categorized as follows:
 + Interact with time/repetitions
-+ Compose effect sequentially
-+ Compose effect in parallel
++ Compose sequentially executed effects
++ Compose parallely executed effect
++ Compose concurrent effect
 + Act on the error channel
 + Act on the environment channel
 + Async API
@@ -79,6 +86,7 @@ They have different purpose and can be roughly categorized as follows:
 |                      `forkDaemon`                      	|               	| _fork an effect_ the global scope (daemon behavior)                                                      	|
 |                       `forkIn zs`                      	|               	| _fork an effect_ in the given scope                                                                      	|
 |                       `forkOn ec`                      	|               	| _fork an effect_ in the specified execution context                                                      	|
+|                        `lock ex`                       	|               	| _fork an effect_ in the specified executor`                                                              	|
 |                    `forkManaged zm`                    	|               	| _fork and effect_ in the given `ZManaged`                                                                	|
 |                         `in zs`                        	|               	| _modify the scope of the effect by_ extending the scope of the effect to the given scope                 	|
 |                 `overrideForkScope zs`                 	|               	| _modify the scope of the effect by_ **replacing** the scope of the effect by the given scope             	|
