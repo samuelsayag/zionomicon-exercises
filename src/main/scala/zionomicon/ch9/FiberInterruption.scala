@@ -135,11 +135,11 @@ object WaitingForInterruption1 extends ZIOApp {
     promise  <- Promise.make[Nothing, Unit]
     finalizer = putStrLn("Finalizing effect...").delay(3.seconds) *> putStr("end of finalizer...")
     // with this wait for the finalizer to finish which is normal
-    //fiber    <- effect(promise, ()).ensuring(finalizer).disconnect.fork
-    fiber    <- effect(promise, ()).ensuring(finalizer).fork
+    fiber    <- effect(promise, ()).ensuring(finalizer).disconnect.fork
+    //fiber    <- effect(promise, ()).ensuring(finalizer).fork
     _        <- promise.await
-    //_        <- fiber.interrupt
-    _        <- fiber.interrupt.fork
+    _        <- fiber.interrupt
+    //_        <- fiber.interrupt.fork
     _        <- putStrLn("Done interrupting...")
   } yield ()
 }
