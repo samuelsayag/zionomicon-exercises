@@ -45,8 +45,8 @@ object Exercize {
       _     <- putStrLn("Guess a number from 1 to 3:")
       guess <- getStrLn.map(_.toInt)
       i     <- nextIntBounded(3)
-      ib = i + 1
-      _ <-
+      ib     = i + 1
+      _     <-
         if (ib == guess) putStrLn("You guess right!")
         else putStrLn(s"You guess wrong, it was $ib")
     } yield ()
@@ -80,7 +80,8 @@ object Exercize {
     }
 
   // ex 16
-  import scala.concurrent.{ExecutionContext, Future}
+  import scala.concurrent.ExecutionContext
+  import scala.concurrent.Future
   trait Query
   trait Result
 
@@ -130,7 +131,7 @@ object NumberGuessing extends ZIOApp {
   def run(args: List[String]): URIO[Random with Console with Console, ExitCode] = (for {
     i   <- inputUntilRight
     rnd <- nextIntBetween(a, b)
-    _ <-
+    _   <-
       if (rnd == i) putStrLn("You guessed it man!")
       else putStrLn(s"Not even close dummy! [mine: $rnd] ")
   } yield ()).exitCode

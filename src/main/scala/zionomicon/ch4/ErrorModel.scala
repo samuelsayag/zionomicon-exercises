@@ -23,7 +23,7 @@ object DivByZero extends ZIOApp {
   def divByZeroChecked(a: Int): IO[ArithmeticException, Int] =
     ZIO.effect(a / 0).mapError { case e: ArithmeticException => e }
 
-  def divByZeroSurfaceCause(a: Int): URIO[Console, Int] =
+  def divByZeroSurfaceCause(a: Int): URIO[Console, Int]      =
     ZIO.effectTotal(a / 0).sandbox.tapError(e => putStrLn(e.prettyPrint)) <>
       ZIO.effectTotal(0)
 

@@ -11,11 +11,10 @@ object SeqWorkFlow extends App {
   def printLine(line: String): Task[Unit] =
     ZIO.effect(println(line))
 
-  val echo: ZIO[Any,Throwable,Unit] = for {
-    line <- zReadLine("first name\n").zipWith(zReadLine("second name\n"))((f, s) =>
-      s"name is $f $s"
-    )
-    _ <- printLine(line)
+  val echo: ZIO[Any, Throwable, Unit] = for {
+    line <-
+      zReadLine("first name\n").zipWith(zReadLine("second name\n"))((f, s) => s"name is $f $s")
+    _    <- printLine(line)
   } yield ()
 
   def run(args: List[String]) = echo.exitCode

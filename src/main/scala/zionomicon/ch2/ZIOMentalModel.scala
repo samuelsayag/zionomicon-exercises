@@ -72,7 +72,7 @@ object ZIO {
       } yield el :: l
     }
 
-  def orElse[R, E1, E2, A](self: ZIO[R, E1, A], that: ZIO[R, E2, A]): ZIO[R,E2,A] =
+  def orElse[R, E1, E2, A](self: ZIO[R, E1, A], that: ZIO[R, E2, A]): ZIO[R, E2, A] =
     self.foldM(_ => that, ZIO.succeed(_))
 
 }

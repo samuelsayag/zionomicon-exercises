@@ -1,15 +1,18 @@
 val zioVersion        = "1.0.7"
 val zioPreludeVersion = "1.0.0-RC3"
-val minorScala        = "2.13"
+val majorScala        = "2.13"
+
+addCommandAlias("cff", "compile;scalafmtAll;scalafixAll")
 
 inThisBuild(
   List(
-    scalaVersion := s"$minorScala.5",
+    scalaVersion := s"$majorScala.5",
     scalacOptions ++= Seq("-Wunused", "-deprecation"),
     version := "0.1.0-SNAPSHOT",
     semanticdbEnabled := true,                        // scalafix: enable SemanticDB
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-    scalafixScalaBinaryVersion := minorScala,
+    scalafixScalaBinaryVersion := majorScala,
+    scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0",
     fork := true
   )
 )

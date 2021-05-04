@@ -4,7 +4,7 @@ import zio._
 import zio.console._
 import zio.clock._
 import zio.duration._
-import zio.{ App => ZIOApp }
+import zio.{App => ZIOApp}
 
 object FibersModel {}
 
@@ -43,7 +43,7 @@ object FiberDefaultSupervision extends ZIOApp {
 
 object FiberForkDaemon extends ZIOApp {
 
-  def run(args: List[String]): URIO[ZEnv,ExitCode] = program *> putStrLn("Exiting...").exitCode
+  def run(args: List[String]): URIO[ZEnv, ExitCode] = program *> putStrLn("Exiting...").exitCode
 
   val child: ZIO[Clock with Console, Nothing, Unit] =
     putStrLn("Enter child fiber (as daemon)") *>
