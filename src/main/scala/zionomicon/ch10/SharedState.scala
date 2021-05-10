@@ -58,7 +58,38 @@ object SharedState {
         }
       }
     }
+
+    def updateAndLog[A](r: Ref[A])(f: A => A): URIO[Console, Unit] =
+      r.modify { oldValue =>
+        val newValue = f(oldValue)
+        ((oldValue, newValue), newValue)
+      }.flatMap { case (old, newVal) =>
+        putStrLn(s"Last update was: [$old -> $newVal]")
+      }
   }
+
+  trait RefCache[K, V] {
+    def getOrElseCompute(k: K)(f: K => V): UIO[Ref[V]]
+  }
+
+  object RefCache {
+
+    def make[K, V]: UIO[RefCache[K, V]] =
+      RefM.make(Map.empty[K, Ref[V]]).map { refM =>
+        new RefCache[K, V] {
+          def getOrElseCompute(k: K)(f: K => V): UIO[Ref[V]] =
+            refM
+              .modify { map =>
+                map.get(k) match {
+                  case Some(v) => UIO.effectTotal((v, map))
+                  case _       => Ref.make(f(k)).map(nv => (nv, map + (k -> nv)))
+                }
+              }
+        }
+      }
+
+  }
+
 }
 
 object SharedStateUnsafe extends ZIOApp {
@@ -76,7 +107,7 @@ object SharedStateUnsafe extends ZIOApp {
     } yield ()
 }
 
-object SharedStateSafe extends ZIOApp {
+object SharedStateSafe1 extends ZIOApp {
 
   import SharedState._
 
@@ -86,6 +117,21 @@ object SharedStateSafe extends ZIOApp {
     for {
       ref   <- Ref.make(0)
       _     <- ZIO.foreachPar_(1 to 10000)(_ => ref.update(_ + 1))
+      value <- ref.get
+      _     <- putStrLn(s"The final value is: [$value]")
+    } yield ()
+}
+
+object SharedStateSafe2 extends ZIOApp {
+
+  import SharedState._
+
+  def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
+
+  val program: ZIO[Console, Nothing, Unit] =
+    for {
+      ref   <- Ref.make(0)
+      _     <- ZIO.foreachPar_(1 to 10000)(_ => Ref.updateAndLog(ref)(_ + 1))
       value <- ref.get
       _     <- putStrLn(s"The final value is: [$value]")
     } yield ()
