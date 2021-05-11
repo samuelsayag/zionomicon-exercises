@@ -1,4 +1,4 @@
-package zionomicon
+package zionomicon.ch10
 
 import zio._
 import zio.console._
