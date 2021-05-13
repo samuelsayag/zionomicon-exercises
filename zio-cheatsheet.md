@@ -3,6 +3,26 @@ The ZIO Cheatsheet
 
 ## General considerations
 
+### Why would you want to use ZIO
+
+You want:
+
+- scalability (uses `Fiber`s instead of `Thread`s)
+- asynchronous / non-blocking behavior
+- parallelisation to a high degree
+- concurrency supported (a family of Reference) and STM (Software Transactional Memory)
+- leak-free (high resource management support)
+- efficiency
+- streaming
+- deterministic testability without using external system
+
+At programing level: 
+- a program is a value just as: `3`, `List(5)`, `Some(7)`...which as tremendous consequences on capabilities it gives.
+- it provide a **unified** construct to deal with any effectful program.
+- A **huge collection** of combinator to build program that answer complex problems
+- A simple usable answer to data injection in the form of `ZLayer`s
+- debugging (tracing over all `Fiber`s contrary to `Thread` that "swallow" the stack trace)
+
 ### The language of ZIO
 One of the key to master `ZIO` is to understand its language.
 
@@ -33,6 +53,8 @@ It reads more easily and allows to throw away some complexity of the signature t
 + ZScope is noted `zs`
 + ZManaged is noted `zm`
 + ExecutionContext (scala) `ec`, Executor `ex`
++ Failing values: Error `er`, Throwable `t`, Cause `ce`
++ Exit values `ex`
 
 ## The `ZIO` type
 
@@ -123,6 +145,32 @@ They have different purpose and can be roughly categorized as follows:
 | _combinator_                                                 	| _synonym_     	| _definition_                                                                                                                                                                                                                                                   	|
 | Compose effects in parallel                                  	|               	|                                                                                                                                                                                                                                                                	|
 | _combinator_                                                 	| _synonym_     	| _definition_                                                                                                                                                                                                                                                   	|
+## References family
+
+## `Promise`
+
+Represent a variable (shareable between `Fiber`s) that: 
+- can be set only once
+- synchronize between fibers by waiting for the promise to be fulfilled
+
+|              Type             	| **Promise[E,A]**                                                                                                                                                                                                                                                   	|
+|:-----------------------------:	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+|           _Creation_          	|                                                                                                                                                                                                                                                                    	|
+|          `make[E,A]`          	| Return a unfailing effect of the promise.<br>You create an empty shell for the future value to be set.                                                                                                                                                             	|
+| _Waiting/checking completion_ 	|                                                                                                                                                                                                                                                                    	|
+|            `await`            	| Return the value of the promise.<br>Block the current fiber for completion of the promise                                                                                                                                                                          	|
+|             `poll`            	| Return and optional value of the promise.                                                                                                                                                                                                                          	|
+|            `isDone`           	| Return the completion stage of the promise as a boolean                                                                                                                                                                                                            	|
+|     _Complete the promise_    	| (Method that returns a boolean return `false` <br>when the `Promise` has already been completed and else `true`)                                                                                                                                                   	|
+|          `succeed a`          	| Return a boolean. Complete the promise with a value.                                                                                                                                                                                                               	|
+|          `complete e`         	| Return a boolean. <br>Complete the promise with **1** effect that will be executed **one** time and memoized.<br>All awaiting fibers will receive the same value.                                                                                                  	|
+|        `completeWith e`       	| Return a boolean.Complete the promise with **1** effect that will be executed for each awaiting fiber.<br>Thus, the result can be different for each fiber.<br>Way faster than `complete`.<br>Return `false` if the promise has already been completed else `true` 	|
+|           `done ex`           	| Return a boolean.Complete the promise with an exit value.                                                                                                                                                                                                          	|
+|           `fail er`           	| Return a boolean.Complete the promise with the error of type `E`                                                                                                                                                                                                   	|
+|           `halt ce`           	| Return a boolean.Complete the promise with a cause typed with `E`                                                                                                                                                                                                  	|
+|            `die t`            	| Return a boolean. <br>Interrupt all the awaiting fibers. <br>The current fiber dies with the given `Throwable`                                                                                                                                                     	|
+|          `interrupt`          	| Return a boolean. Interrupt all the awaiting fibers.                                                                                                                                                                                                               	|
+
 
 ## The out-of-the-box environment
 

@@ -20,7 +20,7 @@ object FiberLocalState {
       (parent, child) => parent.copy(tail = child :: parent.tail)
     )
 
-  def log(ref: FiberRef[Log])(line: String) =
+  def log(ref: FiberRef[Log])(line: String): UIO[Unit] =
     ref.update(fsl => fsl.copy(head = fsl.head :+ line))
 }
 
@@ -30,7 +30,7 @@ object FiberLocal1 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program = for {
+  val program: ZIO[Console, Nothing, Unit] = for {
     ref    <- makeLog
     _      <- log(ref)("I am in the main fiber")
     fiber1 <- effect1(ref).fork
@@ -41,13 +41,13 @@ object FiberLocal1 extends ZIOApp {
     _      <- putStrLn(log.toString)
   } yield ()
 
-  def effect1(logRef: FiberRef[Log]) =
+  def effect1(logRef: FiberRef[Log]): ZIO[Any, Nothing, Unit] =
     for {
       _ <- ZIO.effectTotal(1).tap(v => log(logRef)(s"I got value [$v]"))
       _ <- ZIO.effectTotal(3).tap(v => log(logRef)(s"I got value [$v]"))
     } yield ()
 
-  def effect2(logRef: FiberRef[Log]) =
+  def effect2(logRef: FiberRef[Log]): ZIO[Any, Nothing, Unit] =
     for {
       _ <- ZIO.effectTotal(2).tap(v => log(logRef)(s"I got value [$v]"))
       _ <- ZIO.effectTotal(4).tap(v => log(logRef)(s"I got value [$v]"))
