@@ -3,6 +3,7 @@ package zionomicon.ch10
 import zio._
 import zio.console._
 import zio.{App => ZIOApp}
+import java.io.IOException
 
 object FiberLocalState {
 
@@ -30,7 +31,7 @@ object FiberLocal1 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program: ZIO[Console, Nothing, Unit] = for {
+  val program: ZIO[Console, IOException, Unit] = for {
     ref    <- makeLog
     _      <- log(ref)("I am in the main fiber")
     fiber1 <- effect1(ref).fork

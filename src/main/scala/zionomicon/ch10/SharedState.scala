@@ -4,6 +4,7 @@ import zio._
 import zio.{App => ZIOApp}
 import zio.console._
 import java.util.concurrent.atomic.AtomicReference
+import java.io.IOException
 
 object SharedState {
 
@@ -59,7 +60,7 @@ object SharedState {
       }
     }
 
-    def updateAndLog[A](r: Ref[A])(f: A => A): URIO[Console, Unit] =
+    def updateAndLog[A](r: Ref[A])(f: A => A): ZIO[Console, IOException, Unit] =
       r.modify { oldValue =>
         val newValue = f(oldValue)
         ((oldValue, newValue), newValue)
@@ -98,7 +99,7 @@ object SharedStateUnsafe extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program: ZIO[Console, Nothing, Unit] =
+  val program: ZIO[Console, IOException, Unit] =
     for {
       ref   <- Var.make(0)
       _     <- ZIO.foreachPar_(1 to 10000)(_ => ref.modify(_ + 1))
@@ -113,7 +114,7 @@ object SharedStateSafe1 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program: ZIO[Console, Nothing, Unit] =
+  val program: ZIO[Console, IOException, Unit] =
     for {
       ref   <- Ref.make(0)
       _     <- ZIO.foreachPar_(1 to 10000)(_ => ref.update(_ + 1))
@@ -128,7 +129,7 @@ object SharedStateSafe2 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program: ZIO[Console, Nothing, Unit] =
+  val program: ZIO[Console, IOException, Unit] =
     for {
       ref   <- Ref.make(0)
       _     <- ZIO.foreachPar_(1 to 10000)(_ => Ref.updateAndLog(ref)(_ + 1))

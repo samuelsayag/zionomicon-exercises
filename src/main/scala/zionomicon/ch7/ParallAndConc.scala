@@ -5,6 +5,7 @@ import zio.console._
 import zio.duration._
 import zio.{App => ZIOApp}
 import zio.clock.Clock
+import java.io.IOException
 
 object ParallAndConc
 
@@ -38,7 +39,7 @@ object RacingEx extends ZIOApp {
   def successAndSuccess(
       sleep1: Duration,
       sleep2: Duration
-  ): ZIO[Clock with Console, Nothing, Unit] = {
+  ): ZIO[Clock with Console, IOException, Unit] = {
     // succeed effect
     val e1 = ZIO.sleep(sleep1) *> putStrLn("==== Exit the first effect ====")
     val e2 = ZIO.sleep(sleep2) *> putStrLn("==== Exit the second effect ====")

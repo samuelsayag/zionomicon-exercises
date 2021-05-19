@@ -5,13 +5,14 @@ import zio.console._
 import zio.duration._
 import zio.{App => ZIOApp}
 import zio.clock.Clock
+import java.io.IOException
 
 // simple example to expose the way synch work thanks to Promise
 object PromiseSimple1 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program: ZIO[Console, Nothing, Unit] = for {
+  val program: ZIO[Console, IOException, Unit] = for {
     promise <- Promise.make[Nothing, Unit]
     fiber1  <- (putStrLn("Hello, ") *> promise.succeed(())).fork
     fiber2  <- (promise.await *> putStrLn(" World!")).fork
@@ -27,14 +28,14 @@ object PromiseCompleteEffect extends ZIOApp {
 
   val genInt: UIO[Int] = ZIO.effectTotal(scala.util.Random.nextInt())
 
-  def program1: ZIO[Console, Nothing, Unit] = for {
+  def program1: ZIO[Console, IOException, Unit] = for {
     promise <- Promise.make[Nothing, Int]
     _       <- promise.complete(genInt)
     t       <- (promise.await <*> promise.await)
     _       <- putStrLn(s"The result tuple is [$t]")
   } yield ()
 
-  def program2: ZIO[Console, Nothing, Unit] = for {
+  def program2: ZIO[Console, IOException, Unit] = for {
     promise <- Promise.make[Nothing, Int]
     _       <- promise.completeWith(genInt)
     t       <- (promise.await <*> promise.await)
@@ -110,14 +111,17 @@ object PromiseInterrupt extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  def waitForPromWithDuration[E, A](p: Promise[E, A], n: Duration): ZIO[Console with Clock, E, A] =
+  def waitForPromWithDuration[E, A](
+      p: Promise[E, A],
+      n: Duration
+  ): ZIO[Console with Any with Clock, Any, A] =
     for {
       coeff <- ZIO.effectTotal(n * 100)
       _     <- putStrLn(s"Fiber with duration [$coeff]")
       value <- p.await.delay(5.seconds) <&> ZIO.sleep(coeff)
     } yield value._1
 
-  val program: ZIO[Console with Clock, Exception, Unit] =
+  val program: ZIO[Console with Any with Clock, Any, Unit] =
     for {
       promise <- Promise.make[Exception, Unit]
       fibers  <-

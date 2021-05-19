@@ -5,6 +5,7 @@ import zio.console._
 import zio.clock._
 import zio.duration._
 import zio.{App => ZIOApp}
+import java.io.IOException
 
 object FibersModel {}
 
@@ -12,7 +13,7 @@ object FiberForkJoin extends ZIOApp {
 
   def run(args: List[String]) = program.exitCode
 
-  def program: ZIO[ZEnv, Nothing, Unit] = for {
+  def program: ZIO[Clock with Console, IOException, Unit] = for {
     f <- ZIO.sleep(5.seconds).fork
     _ <- (putStrLn("I am a little teapot-") *> putStrLn("I am a little teapot+")).repeatN(100000)
     _ <- f.join
@@ -23,11 +24,11 @@ object FiberDefaultSupervision extends ZIOApp {
 
   def run(args: List[String]) = program.exitCode
 
-  val child: ZIO[Clock with Console, Nothing, Unit] =
+  val child: ZIO[Console with Clock, IOException, Unit] =
     putStrLn("Enter child fiber") *>
       ZIO.sleep(5.seconds) *> putStrLn("Hello from a child fiber")
 
-  val parent: ZIO[Clock with Console, Nothing, Unit] =
+  val parent: ZIO[Console with Clock, IOException, Unit] =
     child.fork *> putStrLn("Enter parent fiber") *> ZIO.sleep(3.seconds) *> putStrLn(
       "Hello from a parent fiber"
     )
@@ -45,11 +46,11 @@ object FiberForkDaemon extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program *> putStrLn("Exiting...").exitCode
 
-  val child: ZIO[Clock with Console, Nothing, Unit] =
+  val child: ZIO[Console with Clock, IOException, Unit] =
     putStrLn("Enter child fiber (as daemon)") *>
       ZIO.sleep(13.seconds) *> putStrLn("Out of the child")
 
-  val parent: ZIO[Clock with Console, Nothing, Unit] =
+  val parent: ZIO[Console with Clock, IOException, Unit] =
     child.forkDaemon *> putStrLn("Enter parent fiber") *> ZIO.sleep(3.seconds) *> putStrLn(
       "Hello from a parent fiber"
     )
@@ -69,7 +70,7 @@ object FiberForkAwait extends ZIOApp {
 
   val work: UIO[Int] = ZIO.effectTotal(throw new Exception("boom!"))
 
-  val program: ZIO[ZEnv, Nothing, Unit] = for {
+  val program: ZIO[Clock with Console, IOException, Unit] = for {
     fiber <- work.fork
     _     <- ZIO.sleep(5.second)
     i     <- fiber.await.map(_.getOrElse(_ => 555))
@@ -84,7 +85,7 @@ object FiberForkPoll extends ZIOApp {
 
   val work: URIO[Clock, Int] = ZIO.sleep(10.seconds) *> ZIO.effectTotal(555)
 
-  val program: ZIO[ZEnv, Nothing, Unit] = for {
+  val program: ZIO[Clock with Console, IOException, Unit] = for {
     fiber <- work.fork
     i     <- fiber.await.map(_.getOrElse(_ => 555))
     _     <- putStrLn(s"The number computed is: [$i]")

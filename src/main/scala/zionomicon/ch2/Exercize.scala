@@ -136,7 +136,7 @@ object NumberGuessing extends ZIOApp {
       else putStrLn(s"Not even close dummy! [mine: $rnd] ")
   } yield ()).exitCode
 
-  def inputUntilRight: URIO[Console, Int] =
+  def inputUntilRight: ZIO[Console, IOException, Int] =
     readInt <> (putStrLn(s"- Still not between [$a, $b]") *> inputUntilRight)
 
   def readInt: ZIO[Console, Any, Int] = for {

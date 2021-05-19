@@ -5,22 +5,26 @@ import zio.console._
 import zio.duration._
 import zio.{App => ZIOApp}
 import zio.clock.Clock
+import java.io.IOException
 
 object FiberSupervision {
 
-  def dbgScope[A](scope: ZScope[A], msg: Option[String] = None): ZIO[Console, Nothing, Unit] =
+  def dbgScope[A](scope: ZScope[A], msg: Option[String] = None): ZIO[Console, IOException, Unit] =
     (ZIO.fromOption(msg) <> ZIO.succeed("fiber scope: ")) >>= (s => putStrLn(s"$s [$scope]"))
 
-  def dbgOpen[A](open: ZScope.Open[A], msg: Option[String] = None): ZIO[Console, Nothing, Unit] =
+  def dbgOpen[A](
+      open: ZScope.Open[A],
+      msg: Option[String] = None
+  ): ZIO[Console, IOException, Unit] =
     dbgScope(open.scope, msg)
 }
 
 object FiberSuperLocalScope1 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    neverEnding *> putStrLn("End of prog...").exitCode
+    (neverEnding *> putStrLn("End of prog...") <> ZIO.unit).exitCode
 
-  def neverEnding: ZIO[Console, Nothing, Unit] = for {
+  def neverEnding: ZIO[Console, IOException, Unit] = for {
     _ <- putStrLn("enter the effect")
     _ <- putStrLn("enter the never") *> ZIO.never
     // never ending
@@ -33,10 +37,10 @@ object FiberSuperLocalScope2 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = prog1.exitCode
 
-  val childEffect: ZIO[Console with Clock, Nothing, Unit] =
+  val childEffect: ZIO[Console with Clock, IOException, Unit] =
     putStrLn("I am the child effect").delay(1.seconds)
 
-  val parentEffect: ZIO[Console with Clock, Nothing, Fiber.Runtime[Nothing, Unit]] =
+  val parentEffect: ZIO[Console with Clock, IOException, Fiber.Runtime[IOException, Unit]] =
     putStrLn("I am the parent effect") *> childEffect.fork
   // Put the join to see the childEffect terminating
   // >>= (e => e.join)
@@ -51,7 +55,7 @@ object FiberSuperGlobalScope extends ZIOApp {
     // module.exitCode
     program.tap(r => putStrLn(s"Result is [$r]")).exitCode
 
-  val effect: ZIO[Console with Clock, Nothing, Int] = for {
+  val effect: ZIO[Console with Clock, IOException, Int] = for {
     //_ <- putStrLn("hearbeat !").delay(1.second).forever.fork
     // when reaching the end of the LocalScope the fiber does not end
     _ <- putStrLn("hearbeat !").delay(1.second).forever.forkDaemon
@@ -60,13 +64,13 @@ object FiberSuperGlobalScope extends ZIOApp {
     // _ <- ZIO.sleep(5.seconds)
   } yield 42
 
-  val module: ZIO[Console with Clock, Nothing, Int] = for {
+  val module: ZIO[Console with Clock, IOException, Int] = for {
     fiber  <- effect.fork
     _      <- putStrLn("Doing a lot of big work...").delay(5.seconds)
     result <- fiber.join
   } yield result
 
-  val program: ZIO[Console with Clock, Nothing, Int] = for {
+  val program: ZIO[Console with Clock, IOException, Int] = for {
     // we would like the hearbeat to live during the life of the module ONLY!
     fiber <- module.fork
     _     <- putStrLn("Doing the main work of the application").delay(10.seconds)
@@ -80,19 +84,19 @@ object FiberSuperZScope1 extends ZIOApp {
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
     program.tap(r => putStrLn(s"Program end with: [$r]")).exitCode
 
-  def effect(scope: ZScope[Exit[Any, Any]]): ZIO[Console with Clock, Nothing, Int] = for {
+  def effect(scope: ZScope[Exit[Any, Any]]): ZIO[Console with Clock, IOException, Int] = for {
     // scope the effect in `scope`
     _ <- putStrLn("hearbeat !").delay(1.second).forever.forkIn(scope)
     _ <- putStrLn("Done with the work of the effect...")
   } yield 42
 
-  def module(scope: ZScope[Exit[Any, Any]]): ZIO[Console with Clock, Nothing, Int] = for {
+  def module(scope: ZScope[Exit[Any, Any]]): ZIO[Console with Clock, IOException, Int] = for {
     fiber  <- effect(scope).fork
     _      <- ZIO.sleep(5.seconds) *> putStrLn("Done with the work of the module...")
     result <- fiber.join
   } yield result
 
-  val program: ZIO[Console with Clock, Nothing, Int] = for {
+  val program: ZIO[Console with Clock, IOException, Int] = for {
     // create a scope for the hearbeat
     open  <- ZScope.make[Exit[Any, Any]]
     fiber <- module(open.scope).fork
@@ -108,19 +112,19 @@ object FiberSuperZScope2 extends ZIOApp {
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
     program.tap(r => putStrLn(s"Program end with: [$r]")).exitCode
 
-  def effect(scope: ZScope[Exit[Any, Any]]): ZIO[Console with Clock, Nothing, Int] = for {
+  def effect(scope: ZScope[Exit[Any, Any]]): ZIO[Console with Clock, IOException, Int] = for {
     // scope the effect in `scope`
     _ <- putStrLn("hearbeat !").delay(1.second).forever.forkIn(scope)
     _ <- putStrLn("Done with the work of the effect...")
   } yield 42
 
-  val module: ZIO[Console with Clock, Nothing, Int] = for {
+  val module: ZIO[Console with Clock, IOException, Int] = for {
     fiber  <- ZIO.forkScopeWith(scope => effect(scope).fork)
     _      <- ZIO.sleep(5.seconds) *> putStrLn("Done with the work of the module...")
     result <- fiber.join
   } yield result
 
-  val program: ZIO[Console with Clock, Nothing, Int] = for {
+  val program: ZIO[Console with Clock, IOException, Int] = for {
     fiber <- module.fork
     _     <- ZIO.sleep(10.seconds) *> putStrLn("Done with the work of the application...")
     res   <- fiber.join
@@ -141,12 +145,12 @@ object FiberSuperZScope3 extends ZIOApp {
       b  <- fs.join
     } yield f(a, b)
 
-  val hearbeat: URIO[Console with Clock, Fiber.Runtime[Nothing, Nothing]] =
+  val hearbeat: URIO[Console with Clock, Fiber.Runtime[IOException, Nothing]] =
     putStrLn("I am alive...").delay(1.second).forever.fork
 
-  val somethingElse: URIO[Console, Unit] = putStrLn("Something else is being done")
+  val somethingElse: ZIO[Console, IOException, Unit] = putStrLn("Something else is being done")
 
-  val effect: ZIO[Console with Clock, Nothing, Fiber.Runtime[Nothing, Nothing]] =
+  val effect: ZIO[Console with Clock, IOException, Fiber.Runtime[IOException, Nothing]] =
     zipPar1(hearbeat, somethingElse)((fiber, _) => fiber)
 }
 
@@ -154,7 +158,7 @@ object FiberSuperJustRef extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = effect.exitCode
 
-  val effect: ZIO[Console, Nothing, Unit] = for {
+  val effect: ZIO[Console, IOException, Unit] = for {
     ref <- Ref.make(0)
     _   <- ref.get.tap(v => putStrLn(s"Last value of the ref [$v]"))
   } yield ()
@@ -163,15 +167,14 @@ object FiberSuperJustRef extends ZIOApp {
 object FiberSuperRefFork extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    ZIO.scopeWith(s => putStrLn(s"main0: $s")) *>
+    (ZIO.scopeWith(s => putStrLn(s"main0: $s")) *>
       ZIO.forkScopeWith(s => putStrLn(s"main1: $s")) *>
       ZIO.forkScope.flatMap(v => putStrLn(s"main2: $v")) *>
       effect
         .tap(_ => ZIO.forkScope.flatMap(v => putStrLn(s"main3: $v")))
-        .tap(v => putStrLn(s"the value is [$v]"))
-        .exitCode
+        .tap(v => putStrLn(s"the value is [$v]"))).exitCode
 
-  val effect: ZIO[Console, Nothing, Int] = for {
+  val effect: ZIO[Console, IOException, Int] = for {
     ref   <- Ref.make(0)
     _     <- ZIO.forkScope.flatMap(v => putStrLn(s"in effect1: $v"))
     fiber <-
@@ -187,7 +190,7 @@ object FiberSuperRefPromise extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = module.exitCode
 
-  lazy val module: ZIO[Console, Nothing, Int] = for {
+  lazy val module: ZIO[Console, IOException, Int] = for {
     //fiber <- effect1.fork
     fiber <- effect2.fork
     ref   <- fiber.join
@@ -195,7 +198,7 @@ object FiberSuperRefPromise extends ZIOApp {
     _     <- putStrLn(s"value of ref [$value]")
   } yield value
 
-  val effect1: ZIO[Console, Nothing, Ref[Int]] = for {
+  val effect1: ZIO[Console, IOException, Ref[Int]] = for {
     promise <- Promise.make[Nothing, Unit]
     ref     <- Ref.make(0)
     _       <- (promise.succeed(()) *> ZIO.never).ensuring(ref.set(1)).fork
@@ -203,7 +206,7 @@ object FiberSuperRefPromise extends ZIOApp {
     _       <- ref.get.tap(v => putStrLn(s"value of ref [$v]"))
   } yield ref
 
-  val effect2: ZIO[Console, Nothing, Ref[Int]] = for {
+  val effect2: ZIO[Console, IOException, Ref[Int]] = for {
     open         <- ZScope.make[Exit[Any, Any]]
     promise      <- Promise.make[Nothing, Unit]
     ref          <- Ref.make(0)
@@ -220,32 +223,33 @@ object FS1 extends ZIOApp {
   import FiberSupervision._
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    ZIO.scopeWith(s => dbgScope(s)) *>
-      ZIO.forkScopeWith(s => dbgScope(s)).exitCode
+    (ZIO.scopeWith(s => dbgScope(s)) *>
+      ZIO.forkScopeWith(s => dbgScope(s))).exitCode
 }
 
 object FS2 extends ZIOApp {
   import FiberSupervision._
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    ZIO.scopeWith(s => dbgScope(s)) *>
+    (ZIO.scopeWith(s => dbgScope(s)) *>
       ZIO.forkScopeWith(s => dbgScope(s)) *>
-      effect.exitCode
+      effect).exitCode
 
-  val effect: ZIO[Console, Nothing, Unit] = putStrLn("Some effect working...") *>
-    ZIO.scopeWith(s => dbgScope(s)) *>
-    ZIO.forkScopeWith(s => dbgScope(s)) as (())
+  val effect: ZIO[Console, IOException, Unit] =
+    putStrLn("Some effect working...") *>
+      ZIO.scopeWith(s => dbgScope(s)) *>
+      ZIO.forkScopeWith(s => dbgScope(s)) as (())
 }
 
 object FS3 extends ZIOApp {
   import FiberSupervision._
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    ZIO.scopeWith(s => dbgScope(s)) *>
+    (ZIO.scopeWith(s => dbgScope(s)) *>
       ZIO.forkScopeWith(s => dbgScope(s)) *>
       effect *>
-      ZIO.forkScopeWith(s => dbgScope(s).fork).exitCode
+      ZIO.forkScopeWith(s => dbgScope(s).fork)).exitCode
 
-  val effect: ZIO[Console, Nothing, Fiber.Runtime[Nothing, Unit]] =
+  val effect: ZIO[Console, IOException, Fiber.Runtime[IOException, Unit]] =
     putStrLn("Some effect working...").fork.tap(f => dbgScope(f.scope, Some("in effect")))
 }

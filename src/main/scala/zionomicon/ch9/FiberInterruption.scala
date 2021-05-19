@@ -8,6 +8,7 @@ import zio.{App => ZIOApp}
 import java.util.concurrent.atomic.AtomicBoolean
 import zio.blocking.Blocking
 import zio.clock.Clock
+import java.io.IOException
 
 /** Interruption of Fiber
   *
@@ -77,7 +78,7 @@ object BlockingInterrupt2 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val program: ZIO[Blocking with Clock with Console, Nothing, Unit] = for {
+  val program: ZIO[Blocking with Clock with Console, IOException, Unit] = for {
     fiber <- effect.fork
     _     <- ZIO.sleep(10.millis)
     _     <- fiber.interrupt
@@ -110,14 +111,17 @@ object InterruptibleRegion2 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  val effect1: ZIO[Console with Clock, Nothing, Unit] = putStrLn("end of effect 1").delay(1.second)
-  val effect2: ZIO[Console with Clock, Nothing, Unit] = putStrLn("end of effect 2").delay(2.second)
-  val effect3: ZIO[Console with Clock, Nothing, Unit] = putStrLn("end of effect 3").delay(3.second)
+  val effect1: ZIO[Console with Clock, IOException, Unit] =
+    putStrLn("end of effect 1").delay(1.second)
+  val effect2: ZIO[Console with Clock, IOException, Unit] =
+    putStrLn("end of effect 2").delay(2.second)
+  val effect3: ZIO[Console with Clock, IOException, Unit] =
+    putStrLn("end of effect 3").delay(3.second)
 
-  val effectUninterruptible: ZIO[Console with Clock, Nothing, Unit] =
+  val effectUninterruptible: ZIO[Console with Clock, IOException, Unit] =
     (effect1 *> effect2 *> effect3).uninterruptible
 
-  val effectInterruptibleRegion: ZIO[Console with Clock, Nothing, Unit] =
+  val effectInterruptibleRegion: ZIO[Console with Clock, IOException, Unit] =
     (effect1 *> effect2 *> effect3.interruptible).uninterruptible
 
   val program: ZIO[Console with Clock, Nothing, Unit] = for {
@@ -132,12 +136,13 @@ object WaitingForInterruption1 extends ZIOApp {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
-  def effect[E, A](promise: Promise[E, A], a: A): ZIO[Console, Nothing, Nothing] =
+  def effect[E, A](promise: Promise[E, A], a: A): ZIO[Console, IOException, Nothing] =
     putStrLn("Entering the effect") *> promise.succeed(a) *> ZIO.never
 
-  val program: ZIO[Console with Clock, Nothing, Unit] = for {
+  val program: ZIO[Console with Clock, IOException, Unit] = for {
     promise  <- Promise.make[Nothing, Unit]
-    finalizer = putStrLn("Finalizing effect...").delay(3.seconds) *> putStr("end of finalizer...")
+    finalizer = (putStrLn("Finalizing effect...").delay(3.seconds) *>
+                  putStr("end of finalizer...")) <> (ZIO.unit)
     // with this wait for the finalizer to finish which is normal
     fiber    <- effect(promise, ()).ensuring(finalizer).disconnect.fork
     //fiber    <- effect(promise, ()).ensuring(finalizer).fork
