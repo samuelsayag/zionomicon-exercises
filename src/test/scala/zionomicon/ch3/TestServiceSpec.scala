@@ -1,11 +1,13 @@
 package zionomicon.ch3
 
+import zio._
 import zio.test._
 import zio.duration._
 import zio.console._
 import zio.test.Assertion._
 import zio.test.environment._
 import java.io.IOException
+import zio.clock.Clock
 
 object TestServiceSpec extends DefaultRunnableSpec {
 
@@ -13,13 +15,13 @@ object TestServiceSpec extends DefaultRunnableSpec {
 
   /** ZIO program involving just the console
     */
-  val greet: ZIO[Console,IOException,Unit] =
+  val greet: ZIO[Console, IOException, Unit] =
     for {
       name <- getStrLn.orDie
       _    <- putStrLn(s"Hello, $name")
     } yield ()
 
-  val consoleEnvTest: ZSpec[Console with TestConsole,IOException] =
+  val consoleEnvTest: ZSpec[Console with TestConsole, IOException] =
     testM("Test the console env") {
       for {
         _     <- TestConsole.feedLines("Jane!")
@@ -28,10 +30,10 @@ object TestServiceSpec extends DefaultRunnableSpec {
       } yield assert(value)(equalTo(Vector(s"Hello, Jane!\n")))
     }
 
-  val goShopping: ZIO[Console with Clock,IOException,Unit] =
+  val goShopping: ZIO[Console with Clock, IOException, Unit] =
     putStrLn("I am going shopping now...").delay(1.hour)
 
-  val clockConsoleTest: ZSpec[Console with Clock with TestClock with TestConsole,IOException] =
+  val clockConsoleTest: ZSpec[Console with Clock with TestClock with TestConsole, IOException] =
     testM("Test console+clock env") {
       for {
         fiber  <- goShopping.fork

@@ -2,7 +2,7 @@ val zioVersion        = "1.0.8"
 val zioPreludeVersion = "1.0.0-RC4"
 val majorScala        = "2.13"
 
-addCommandAlias("cff", "compile;scalafmtAll;scalafixAll")
+addCommandAlias("cff", "compile;scalafixAll;scalafmtAll;")
 
 inThisBuild(
   List(
