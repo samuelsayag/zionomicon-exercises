@@ -4,16 +4,17 @@ import zio._
 import zio.console._
 import zio.duration._
 import zio.blocking
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import java.util.concurrent.atomic.AtomicBoolean
 import zio.blocking.Blocking
 import zio.clock.Clock
 import java.io.IOException
 
-/** Interruption of Fiber
-  *
-  * - fiber.interrupt()
-  */
+/**
+ * Interruption of Fiber
+ *
+ * - fiber.interrupt()
+ */
 
 // fiber that may never be executed in anyway
 object InterruptSimple extends ZIOApp {

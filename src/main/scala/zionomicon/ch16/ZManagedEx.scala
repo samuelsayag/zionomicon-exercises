@@ -1,9 +1,10 @@
 package zionomicon.ch16
 
 import zio._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import java.io.IOException
 import java.io.File
+import scala.io.Source
 
 object ZManagedExample1 extends ZIOApp {
 
@@ -45,4 +46,27 @@ object ZManagedExample2 extends ZIOApp {
   lazy val program: ZIO[Any, IOException, Task[Unit]] = dataFiles.map { case (weather, result) =>
     analyze(weather, result)
   }
+}
+
+object ZManagedExample3 extends ZIOApp {
+
+  def run(args: List[String]): URIO[ZEnv, ExitCode] = ???
+
+  def file(path: String): ZManaged[Any, IOException, File] = ???
+
+  lazy val names: List[String] = ???
+
+  lazy val files: ZManaged[Any, Throwable, List[File]] =
+    // ZManaged.foreachParN(4)(names)(file)
+    ZManaged.foreach(names)(file)
+
+  lazy val weatherData: Task[List[String]] =
+    files.use { files =>
+      Task
+        .foreach(files) { file =>
+          Task(Source.fromFile(file).getLines().toList)
+        }
+        .map(_.flatten)
+    }
+
 }

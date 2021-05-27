@@ -3,7 +3,7 @@ package zionomicon.ch7
 import zio._
 import zio.console._
 import zio.duration._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import zio.clock.Clock
 import java.io.IOException
 
@@ -16,8 +16,8 @@ object ZipParEx extends ZIOApp {
     successAndFail(5.seconds, 3.seconds).exitCode // wil execute just the one that fails
 
   def successAndFail(
-      sleep1: Duration,
-      sleep2: Duration
+    sleep1: Duration,
+    sleep2: Duration
   ): RIO[Clock with Console, (Unit, Nothing)] = {
     // succeed effect
     val e1 = ZIO.sleep(sleep1) *> putStrLn("==== The exit the first effect ====")
@@ -37,8 +37,8 @@ object RacingEx extends ZIOApp {
     successAndFailure(5.seconds, 2.seconds).exitCode
 
   def successAndSuccess(
-      sleep1: Duration,
-      sleep2: Duration
+    sleep1: Duration,
+    sleep2: Duration
   ): ZIO[Clock with Console, IOException, Unit] = {
     // succeed effect
     val e1 = ZIO.sleep(sleep1) *> putStrLn("==== Exit the first effect ====")
@@ -53,8 +53,8 @@ object RacingEx extends ZIOApp {
   }
 
   def successAndFailure(
-      sleep1: Duration,
-      sleep2: Duration
+    sleep1: Duration,
+    sleep2: Duration
   ): ZIO[Clock with Console, Throwable, Unit] = {
     // succeed effect
     val e1 = ZIO.sleep(sleep1) *> putStrLn("==== Exit the first effect ====")

@@ -13,8 +13,9 @@ object TestServiceSpec extends DefaultRunnableSpec {
 
   def spec: ZSpec[Environment, Failure] = suite("myEnvTests")(consoleEnvTest, clockConsoleTest)
 
-  /** ZIO program involving just the console
-    */
+  /**
+   * ZIO program involving just the console
+   */
   val greet: ZIO[Console, IOException, Unit] =
     for {
       name <- getStrLn.orDie

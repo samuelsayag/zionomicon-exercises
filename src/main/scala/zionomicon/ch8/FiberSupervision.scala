@@ -3,7 +3,7 @@ package zionomicon.ch8
 import zio._
 import zio.console._
 import zio.duration._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import zio.clock.Clock
 import java.io.IOException
 
@@ -13,8 +13,8 @@ object FiberSupervision {
     (ZIO.fromOption(msg) <> ZIO.succeed("fiber scope: ")) >>= (s => putStrLn(s"$s [$scope]"))
 
   def dbgOpen[A](
-      open: ZScope.Open[A],
-      msg: Option[String] = None
+    open: ZScope.Open[A],
+    msg: Option[String] = None
   ): ZIO[Console, IOException, Unit] =
     dbgScope(open.scope, msg)
 }

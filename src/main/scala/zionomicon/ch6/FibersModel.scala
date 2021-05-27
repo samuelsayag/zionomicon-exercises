@@ -4,7 +4,7 @@ import zio._
 import zio.console._
 import zio.clock._
 import zio.duration._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import java.io.IOException
 
 object FibersModel {}

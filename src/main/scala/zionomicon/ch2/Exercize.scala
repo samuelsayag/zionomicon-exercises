@@ -5,7 +5,7 @@ import scala.io.Source
 import zio.console._
 import zio.random._
 import java.io.IOException
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 
 object Exercize {
 
@@ -65,9 +65,8 @@ object Exercize {
   // ex 14
   def getCacheValue(key: String, success: String => Unit, failure: Throwable => Unit) = ???
 
-  def getCacheValueZIO(key: String): ZIO[Any, Throwable, String] = ZIO.effectAsync {
-    (cbk: Task[String] => Unit) =>
-      getCacheValue(key, s => cbk(ZIO.succeed(s)), th => cbk(ZIO.fail(th)))
+  def getCacheValueZIO(key: String): ZIO[Any, Throwable, String] = ZIO.effectAsync { (cbk: Task[String] => Unit) =>
+    getCacheValue(key, s => cbk(ZIO.succeed(s)), th => cbk(ZIO.fail(th)))
   }
 
   // ex 15

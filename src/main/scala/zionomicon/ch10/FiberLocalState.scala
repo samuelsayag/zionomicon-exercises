@@ -2,7 +2,7 @@ package zionomicon.ch10
 
 import zio._
 import zio.console._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import java.io.IOException
 
 object FiberLocalState {

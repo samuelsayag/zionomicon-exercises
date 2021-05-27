@@ -1,7 +1,7 @@
 package zionomicon.ch10
 
 import zio._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import zio.console._
 import java.util.concurrent.atomic.AtomicReference
 import java.io.IOException
@@ -79,13 +79,12 @@ object SharedState {
       RefM.make(Map.empty[K, Ref[V]]).map { refM =>
         new RefCache[K, V] {
           def getOrElseCompute(k: K)(f: K => V): UIO[Ref[V]] =
-            refM
-              .modify { map =>
-                map.get(k) match {
-                  case Some(v) => UIO.effectTotal((v, map))
-                  case _       => Ref.make(f(k)).map(nv => (nv, map + (k -> nv)))
-                }
+            refM.modify { map =>
+              map.get(k) match {
+                case Some(v) => UIO.effectTotal((v, map))
+                case _       => Ref.make(f(k)).map(nv => (nv, map + (k -> nv)))
               }
+            }
         }
       }
 

@@ -2,7 +2,7 @@ package zionomicon.ch15
 
 import zio._
 import zio.console._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import scala.io.Source
 import java.io.File
 

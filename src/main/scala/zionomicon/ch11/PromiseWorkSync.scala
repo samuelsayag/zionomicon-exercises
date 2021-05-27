@@ -3,7 +3,7 @@ package zionomicon.ch11
 import zio._
 import zio.console._
 import zio.duration._
-import zio.{App => ZIOApp}
+import zio.{ App => ZIOApp }
 import zio.clock.Clock
 import java.io.IOException
 
@@ -112,8 +112,8 @@ object PromiseInterrupt extends ZIOApp {
   def run(args: List[String]): URIO[ZEnv, ExitCode] = program.exitCode
 
   def waitForPromWithDuration[E, A](
-      p: Promise[E, A],
-      n: Duration
+    p: Promise[E, A],
+    n: Duration
   ): ZIO[Console with Any with Clock, Any, A] =
     for {
       coeff <- ZIO.effectTotal(n * 100)
