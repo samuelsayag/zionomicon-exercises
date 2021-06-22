@@ -3,6 +3,7 @@ target/
 .bloop/
 .metals/
 project/target/
+.bsp/
 
 # create this file all the time by error due to vim sortcut :w!
 1
